@@ -16,7 +16,7 @@ all: $(TARGETS)
 
 # Build client
 client: client.cpp
-	$(CXX) client.cpp -o client $(CXXFLAGS) $(LIBS)
+	$(CXX) client.cpp -o client $(LIB) $(CXXFLAGS)
 
 # Build server
 server: server.cpp
@@ -24,3 +24,4 @@ server: server.cpp
 
 clean:
 	rm -f $(TARGETS)
+

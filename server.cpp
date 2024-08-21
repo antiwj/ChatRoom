@@ -16,7 +16,6 @@
 #define INVALID_SOCKET -1
 
 std::mutex mtx;
-int lock = 0;
 std::vector<int> clients;
 
 class ClientInfo {
@@ -59,8 +58,6 @@ void broadcastMsg(ClientMsg &message) {
 }
 
 void ServerRecv(int client_socket, in_addr ipAddr) {
-	// char buffer[BUFFER_SIZE] = { 0 };
-	// ClientMsg cMsg;
 	ClientInfo cInfo;
 	cInfo.m_IpAddr = ipAddr;
 	int offset = 1;
@@ -71,14 +68,11 @@ void ServerRecv(int client_socket, in_addr ipAddr) {
 		ClientMsg cMsg;
 		std::string broadMsg;
 		char buffer[BUFFER_SIZE] = { 0 };
-		if (lock != 0)
-			continue;
 		int ret = recv(client_socket, buffer, sizeof(buffer), 0);
 		if (ret <= 0) {
 			std::cout << "接收消息失败, 断开链接" << std::endl;
 			break;
 		}
-		// buffer[ret] = '\0';
 		messageType = buffer[0];
 
 		if (messageType == 0x01) {
@@ -93,7 +87,6 @@ void ServerRecv(int client_socket, in_addr ipAddr) {
 			cMsg.m_Message[broadMsg.length()] = '\0';
 			broadcastMsg(cMsg);
 		} else if (messageType == 0x02) {
-			lock = 1;
 			std::string message(buffer+offset);
 			std::memcpy(cMsg.m_UserName, cInfo.m_UserName, strlen(cInfo.m_UserName));
 			cMsg.m_UserName[strlen(cInfo.m_UserName)] = '\0';
@@ -101,8 +94,6 @@ void ServerRecv(int client_socket, in_addr ipAddr) {
 			cMsg.m_Message[message.length()] = '\0';
 			broadcastMsg(cMsg);
 			std::cout << "接收消息成功: " << cInfo.m_UserName << ": " << message << std::endl;
-			// ret = 0;
-			lock = 0;
 		} else {
 			std::cout << "消息类型错误" << std::endl;
 		}

@@ -15,8 +15,6 @@
 #define INVALID_SOCKET  -1
 #define CLEAR() printf("\033[2J")               // 清屏函数
 
-static int line = 2;
-
 class ClientMsg {
 public:
 	char m_UserName[20], m_Message[BUFFER_SIZE-30];
@@ -31,7 +29,6 @@ void decode(char* buffer, ClientMsg &obj) {
 	memcpy(&obj, buffer, sizeof(ClientMsg));
 }
 
-	
 void chatMsg(WINDOW* chatWin, int client_socket) {
 	char inBuffer[BUFFER_SIZE] = { 0 };
 	ClientMsg sMsg;
@@ -40,14 +37,11 @@ void chatMsg(WINDOW* chatWin, int client_socket) {
 	getmaxyx(chatWin, hei, wid);
 	int i = 0;
 	while (true) {
-		// ClientMsg sMsg;
-		// char inBuffer[BUFFER_SIZE] = { 0 };
 		int ret = recv(client_socket, inBuffer, sizeof(inBuffer), 0);
 		if (ret <= 0) {
 			wprintw(chatWin, "receive message failed!");
 			return;
 		}
-		// inBuffer[strlen(inBuffer)] = '\0';
 		decode(inBuffer, sMsg);
 		getyx(chatWin, y, x);
 		if (y >= hei-1) {
@@ -57,9 +51,9 @@ void chatMsg(WINDOW* chatWin, int client_socket) {
 		else
 			wmove(chatWin, y, 2);
 		inBuffer[0] = '\0';
-		wprintw(chatWin, sMsg.m_UserName);
+		wprintw(chatWin, "%s", sMsg.m_UserName);
 		wprintw(chatWin, ": ");
-		wprintw(chatWin, sMsg.m_Message);
+		wprintw(chatWin, "%s", sMsg.m_Message);
 		wprintw(chatWin, "\n");
 		wrefresh(chatWin);
 	}
@@ -142,8 +136,8 @@ int main() {
 	titleWin = subwin(stdscr, 3, winWLineNumber - 3, 0, 0);
 	chatWin = subwin(stdscr, (winHLineNumber / 3 * 2) - 2, winWLineNumber - 3, 3, 0);
 	sendWin = subwin(stdscr, (winHLineNumber / 3) - 1, winWLineNumber - 3, (winHLineNumber / 3 * 2) + 1, 0);
-	mvwprintw(titleWin, 2, 0, label);
-	mvwprintw(titleWin, 1,1, username.c_str());
+	mvwprintw(titleWin, 2, 0, "%s", label);
+	mvwprintw(titleWin, 1,1, "%s", username.c_str());
 	refresh();
 	scrollok(chatWin, TRUE);
 	setscrreg(2,18);
